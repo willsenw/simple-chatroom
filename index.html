@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title id="judul"> Welcome </title>
+	<style media="screen">
+		#tbox{
+			position:absolute;
+			bottom: 0px;
+			width: 100%;
+			background: grey;
+			padding:20px;
+		}
+
+		li{
+			padding : 5px;
+		}
+		#messages li:nth-child(even){
+			background: black;
+			color:white;
+		}
+		#tbox.input{
+			height:20px;
+		}
+		#tbox.button{
+			float:left; width: 20%; height:30px;
+		}
+		.hidden{
+			display: none
+		}
+		#chatroom{
+
+		}
+		#RightBox{
+			float :left;
+			width : 25%;
+		}
+		#LeftBox{
+			float :left;
+			width: 25%;
+		}
+	</style>
+</head>
+<body>
+
+	<div id="userbox">
+		<h1> Input your username before enter the chatroom </h1>
+	</div>
+
+	<div id="chatroom" class="hidden">
+		<div id="LeftBox">
+			<h3> Welcome to chatroom</h3>
+			<ul id="messages"></ul>
+		</div>
+
+		<div id="RightBox">
+			<h2> List of online users</h2>
+			<ul id="user_list"></ul>
+		</div>
+	</div>
+
+	<form id="tbox">
+		<input id="text_box" placeholder= "type your chat.." class = "hidden">
+		<input id="input_user" placeholder="input your username..">
+		<button> Send </button>
+	</form>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	
+	<script >
+		var socket = io();
+		var username = '';
+		var isRegistered = false;
+
+		$('form').submit(function(){
+			var user = $('#input_user').val();
+			var msg = $('#text_box').val();
+			if ( isRegistered == false ){
+				socket.emit('registerUser',user);
+				username = user;
+			} else {
+				socket.emit('newMessage',username + ' : ' + msg);
+			}
+			$('#text_box').val('');
+			$('#input_user').val('');
+			return false;
+		});
+
+		socket.on('addOnlineUsers', function(usernames){
+			$('#user_list').empty();
+			console.log('add online users');
+			for ( var i = 0; i < usernames.length; i++ ){
+				$('#user_list').append($('<li id="user_' + usernames[i] + '">').text(usernames[i]));
+			}
+		});
+
+		socket.on('registerRespond', function(status){
+			if ( status == true ){
+				$('#userbox').addClass('hidden');
+				$('#input_user').addClass('hidden');
+				$('#text_box').removeClass('hidden');
+				$('#chatroom').removeClass('hidden');
+				isRegistered = true;
+				username = user;
+				socket.emit('newMessage', user + ' has joined the chatroom');
+			} else {
+				alert('Username already exist');
+			}
+		});
+
+		socket.on('newMessage', function(msg){
+			$('#messages').append($('<li>').text(msg));
+		});
+	</script>
+</body>
+</html>
