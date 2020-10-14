@@ -1,8 +1,7 @@
 # simple-chatroom
 Simple Chatroom app with nodejs
 
-Input username
-
+input username
 ![preview1](/preview1.png)
 
 List of online user
